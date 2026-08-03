@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>MISSÃO 550 — Sistema de Roletas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#FFD700;--gold2:#FF8C00;--green:#00CC55;--green2:#007733;
+  --dark:#080810;--panel:#0f0f1a;--panel2:#161624;--border:#252535;
+  --text:#f0f0ff;--sub:#7070a0;--red:#CC2200;
+}
+body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* PARTICLES BG */
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 15% 50%,#1a0a3044 0%,transparent 55%),
+             radial-gradient(ellipse at 85% 50%,#0a1a0a44 0%,transparent 55%);
+  pointer-events:none;z-index:0}
+
+/* HEADER */
+.hdr{position:relative;z-index:10;
+  background:linear-gradient(135deg,#0d0d1e 0%,#1a0d30 50%,#0d1a0d 100%);
+  border-bottom:2px solid var(--gold);
+  padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.hdr-logo{font-family:'Black Ops One',cursive;font-size:clamp(16px,3vw,26px);
+  color:var(--gold);text-shadow:0 0 24px #FFD70066;letter-spacing:.06em}
+.hdr-logo span{color:var(--green)}
+.badge-live{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+  padding:4px 12px;border-radius:99px;background:#CC220022;color:#FF4444;
+  border:1px solid #CC2200;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* TABS */
+.tabs{position:relative;z-index:10;display:flex;background:var(--panel);border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:.9rem .5rem;text-align:center;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:.04em;
+  color:var(--sub);border-bottom:3px solid transparent;transition:all .2s}
+.tab.on{border-bottom-color:var(--gold);color:var(--gold);background:#FFD70008}
+.tab:hover:not(.on){color:var(--text)}
+
+/* MAIN */
+.main{position:relative;z-index:10;padding:1.5rem;max-width:860px;margin:0 auto}
+.screen{display:none}.screen.on{display:block}
+
+/* ROLETA SECTION */
+.r-wrap{display:flex;flex-direction:column;align-items:center;gap:1.5rem}
+.r-title{font-family:'Black Ops One',cursive;font-size:clamp(18px,4vw,32px);
+  text-align:center;letter-spacing:.08em;line-height:1.2}
+.r-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.6;max-width:500px}
+
+/* CANVAS */
+.c-wrap{position:relative;display:inline-block}
+.seta-top{position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;
+  border-top:32px solid var(--gold);filter:drop-shadow(0 0 10px var(--gold));z-index:5}
+.centro{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:28px;height:28px;border-radius:50%;background:var(--dark);
+  border:3px solid;z-index:5;box-shadow:0 0 16px currentColor}
+
+/* SELECT + BTN */
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+select.vsel{background:var(--panel2);border:1px solid var(--border);color:var(--text);
+  padding:10px 16px;border-radius:10px;font-family:'Rajdhani',sans-serif;
+  font-size:14px;font-weight:700;outline:none;cursor:pointer;min-width:180px}
+select.vsel:focus{border-color:var(--gold)}
+
+.btn-spin{font-family:'Black Ops One',cursive;letter-spacing:.08em;font-size:16px;
+  padding:14px 40px;border:none;border-radius:12px;cursor:pointer;
+  transition:all .15s;position:relative;overflow:hidden}
+.btn-spin:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.btn-spin:active:not(:disabled){transform:scale(.96)}
+.btn-g{background:linear-gradient(135deg,#00CC55,#007733);color:#fff;
+  box-shadow:0 4px 20px #00CC5555}
+.btn-g:hover:not(:disabled){box-shadow:0 6px 30px #00CC5588;transform:translateY(-2px)}
+.btn-e{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#080810;
+  box-shadow:0 4px 20px #FFD70055}
+.btn-e:hover:not(:disabled){box-shadow:0 6px 30px #FFD70088;transform:translateY(-2px)}
+
+/* GATILHOS */
+.gtbox{background:var(--panel2);border:1px solid var(--border);border-radius:14px;
+  padding:1.2rem 1.5rem;width:100%;max-width:500px}
+.gtbox h3{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.9rem}
+.gt{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.gt:last-child{border-bottom:none}
+.gt-ico{font-size:17px;flex-shrink:0;width:24px;text-align:center}
+.gt-txt{flex:1;color:var(--text)}
+.tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;font-family:'Orbitron',monospace;white-space:nowrap}
+
+/* FICHAS */
+.fichas-box{background:var(--panel2);border:1px solid var(--border);border-radius:14px;
+  padding:1.2rem 1.5rem;width:100%;max-width:500px;text-align:center}
+.fichas-box h3{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  color:var(--gold);letter-spacing:.1em;margin-bottom:1rem}
+.frow{display:flex;justify-content:center;gap:14px;margin-bottom:.8rem}
+.fc{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:24px;border:2px dashed var(--border);background:var(--panel);transition:all .35s}
+.fc.on{background:linear-gradient(135deg,#FFD700,#FF8C00);border:3px solid var(--gold);
+  box-shadow:0 0 18px #FFD70066;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(.7)}100%{transform:scale(1)}}
+.fcnt{font-family:'Orbitron',monospace;font-size:20px;font-weight:700}
+.fsub{font-size:11px;color:var(--sub);margin-top:3px}
+.fbtn-row{display:flex;justify-content:center;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.btn-addf{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;
+  padding:8px 18px;border-radius:8px;border:1px solid var(--green2);
+  background:transparent;color:var(--green);cursor:pointer;transition:all .15s}
+.btn-addf:hover{background:#00CC5511}
+.btn-usef{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+  padding:10px 22px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#553C9A,#7F77DD);color:#fff;letter-spacing:.05em;
+  box-shadow:0 4px 14px #553C9A44;transition:all .15s}
+.btn-usef:hover:not(:disabled){box-shadow:0 6px 22px #553C9A77;transform:translateY(-2px)}
+.btn-usef:disabled{opacity:.3;cursor:not-allowed;transform:none}
+
+/* HIST */
+.hbox{background:var(--panel2);border:1px solid var(--border);border-radius:14px;
+  padding:1.2rem 1.5rem;width:100%;max-width:600px}
+.hbox h3{font-family:'Orbitron',monospace;font-size:10px;color:var(--sub);letter-spacing:.1em;margin-bottom:.8rem}
+.hlist{max-height:420px;overflow-y:auto}
+.hi{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:12px}
+.hi:last-child{border-bottom:none}
+.hi-ico{font-size:18px;flex-shrink:0}
+.hi-vend{font-weight:700;color:var(--gold);min-width:70px}
+.hi-r{font-size:10px;color:var(--sub);min-width:45px}
+.hi-p{flex:1}
+.hi-h{font-size:10px;color:var(--sub)}
+.btn-lim{font-size:11px;padding:5px 14px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;margin-top:1rem}
+.btn-lim:hover{color:var(--text);border-color:var(--sub)}
+
+/* OVERLAY */
+.ov{position:fixed;inset:0;background:#00000099;z-index:999;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.ov.show{display:flex}
+.ov-box{background:var(--panel);border:2px solid;border-radius:22px;
+  padding:2.5rem 2rem;text-align:center;max-width:400px;width:92%;
+  animation:popIn .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.65)}to{opacity:1;transform:scale(1)}}
+.ov-ico{font-size:68px;margin-bottom:.7rem;line-height:1}
+.ov-tit{font-family:'Black Ops One',cursive;font-size:clamp(18px,5vw,28px);
+  letter-spacing:.06em;margin-bottom:.4rem}
+.ov-vend{font-size:14px;color:var(--gold);font-weight:700;margin-bottom:.3rem}
+.ov-desc{font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:1.4rem}
+.ov-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ov-btn{font-family:'Black Ops One',cursive;font-size:13px;letter-spacing:.06em;
+  padding:12px 28px;border-radius:10px;border:none;cursor:pointer;transition:all .15s}
+.ov-btn-main{background:var(--gold);color:var(--dark);box-shadow:0 4px 16px #FFD70055}
+.ov-btn-main:hover{box-shadow:0 6px 24px #FFD70088}
+.ov-btn-sec{background:transparent;border:1px solid var(--border);color:var(--sub)}
+.ov-btn-sec:hover{color:var(--text);border-color:var(--sub)}
+
+/* DOBRO */
+.ov-dobro{background:var(--panel);border:2px solid #FF8C00;border-radius:22px;
+  padding:2rem;text-align:center;max-width:420px;width:92%;
+  animation:popIn .45s cubic-bezier(.34,1.56,.64,1)}
+.ov-dobro .ov-tit{color:#FF8C00}
+.timer-bar{height:6px;background:var(--border);border-radius:3px;margin:1rem 0;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));
+  border-radius:3px;transition:width .5s linear}
+
+@media(max-width:600px){.main{padding:1rem}.btn-spin{font-size:14px;padding:12px 28px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">&#9876; MISSÃO <span>550</span></div>
+  <div class="badge-live">&#9679; SISTEMA ATIVO</div>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="aba('campo',this)">🎯 CAMPO &nbsp;5–10k</div>
+  <div class="tab" onclick="aba('elite',this)">💰 ELITE &nbsp;10k+</div>
+  <div class="tab" onclick="aba('hist',this)">📋 HISTÓRICO</div>
+</div>
+
+<div class="main">
+
+<!-- ======= CAMPO ======= -->
+<div class="screen on" id="sc-campo">
+<div class="r-wrap">
+  <div>
+    <div class="r-title" style="color:var(--green)">🎯 ROLETA DE CAMPO</div>
+    <div class="r-sub">Prêmios surpresa — descubra depois do giro</div>
+  </div>
+
+  <div class="c-wrap">
+    <div class="seta-top"></div>
+    <canvas id="cv-campo" width="320" height="320"></canvas>
+    <div class="centro" style="border-color:var(--green);color:var(--green)"></div>
+  </div>
+
+  <div class="ctrl">
+    <select class="vsel" id="vs-campo">
+      <option value="">Selecionar vendedor...</option>
+      <option>LETICIA</option><option>THIAGO</option><option>BRUNA</option><option>MIRIAM</option>
+    </select>
+    <button class="btn-spin btn-g" id="bt-campo" onclick="girar('campo')">&#9654; GIRAR</button>
+  </div>
+
+  <!-- FICHAS -->
+  <div class="fichas-box">
+    <h3>🪙 FICHAS ELITE ACUMULADAS</h3>
+    <div class="frow">
+      <div class="fc" id="fc1">🪙</div>
+      <div class="fc" id="fc2">🪙</div>
+      <div class="fc" id="fc3">🪙</div>
+    </div>
+    <div class="fcnt"><span id="fn">0</span><span style="color:var(--sub);font-size:14px"> / 3</span></div>
+    <div class="fsub">3 fichas = 1 giro na Roleta Elite</div>
+    <div class="fbtn-row">
+      <button class="btn-addf" onclick="addFicha()">+ Ficha manual</button>
+      <button class="btn-usef" id="bt-usef" onclick="usarFichas()" disabled>⚡ Usar 3 fichas</button>
+    </div>
+  </div>
+
+  <!-- GATILHOS CAMPO -->
+  <div class="gtbox">
+    <h3>Gatilhos — Roleta de Campo</h3>
+    <div class="gt"><div class="gt-ico">💵</div><div class="gt-txt">Pedido entre R$ 5.000 e R$ 10.000</div><span class="tag" style="background:#0a1e14;color:#34D399">GIRA + FICHA</span></div>
+    <div class="gt"><div class="gt-ico">🔄</div><div class="gt-txt">Reativação de cliente em churn</div><span class="tag" style="background:#0a1e14;color:#34D399">GIRA</span></div>
+    <div class="gt"><div class="gt-ico">📈</div><div class="gt-txt">Pedido com margem acima de 80%</div><span class="tag" style="background:#0a1e14;color:#34D399">GIRA</span></div>
+    <div class="gt"><div class="gt-ico">🆕</div><div class="gt-txt">Novo cliente com 1º pedido</div><span class="tag" style="background:#0a1e14;color:#34D399">GIRA</span></div>
+    <div class="gt"><div class="gt-ico">💳</div><div class="gt-txt">Pedido a vista acima de R$ 500</div><span class="tag" style="background:#0a1e14;color:#34D399">GIRA</span></div>
+    <div class="gt"><div class="gt-ico">💳</div><div class="gt-txt">R$ 1.000 acumulado a vista na semana</div><span class="tag" style="background:#0a1e14;color:#34D399">GIRA EXTRA</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ======= ELITE ======= -->
+<div class="screen" id="sc-elite">
+<div class="r-wrap">
+  <div>
+    <div class="r-title" style="color:var(--gold)">💰 ROLETA ELITE</div>
+    <div class="r-sub">Prêmios maiores — prêmio revelado após o giro</div>
+  </div>
+
+  <div class="c-wrap">
+    <div class="seta-top"></div>
+    <canvas id="cv-elite" width="360" height="360"></canvas>
+    <div class="centro" style="border-color:var(--gold);color:var(--gold)"></div>
+  </div>
+
+  <div class="ctrl">
+    <select class="vsel" id="vs-elite">
+      <option value="">Selecionar vendedor...</option>
+      <option>LETICIA</option><option>THIAGO</option><option>BRUNA</option><option>MIRIAM</option>
+    </select>
+    <button class="btn-spin btn-e" id="bt-elite" onclick="girar('elite')">💰 GIRAR ELITE</button>
+  </div>
+
+  <!-- GATILHOS ELITE -->
+  <div class="gtbox" style="border-color:#FFD70033">
+    <h3>Gatilhos — Roleta Elite</h3>
+    <div class="gt"><div class="gt-ico">🏆</div><div class="gt-txt">Pedido acima de R$ 10.000</div><span class="tag" style="background:#2d2010;color:#F59E0B">GIRA DIRETO</span></div>
+    <div class="gt"><div class="gt-ico">🪙</div><div class="gt-txt">3 fichas acumuladas da Roleta Campo</div><span class="tag" style="background:#1a0d2d;color:#9F7AEA">VIA FICHAS</span></div>
+  </div>
+
+  <div class="gtbox" style="border-color:#FFD70022;background:#FFD70006">
+    <h3 style="color:#FFD70066">Prêmios desta roleta são revelados após o giro</h3>
+    <div style="font-size:13px;color:var(--sub);line-height:1.8">
+      A roleta mostra apenas <strong style="color:var(--gold)">?</strong> em todos os setores.<br>
+      Após parar, o prêmio é revelado. Boa sorte, soldado. 🎯
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ======= HISTÓRICO ======= -->
+<div class="screen" id="sc-hist">
+<div class="r-wrap">
+  <div>
+    <div class="r-title" style="color:var(--sub);font-size:22px">HISTÓRICO</div>
+    <div class="r-sub">Registro de todos os giros e prêmios</div>
+  </div>
+  <div class="hbox" style="width:100%;max-width:620px">
+    <h3>PREMIAÇÕES AGOSTO 2026</h3>
+    <div class="hlist" id="hlist"></div>
+    <div style="text-align:center"><button class="btn-lim" onclick="limparH()">Limpar histórico</button></div>
+  </div>
+</div>
+</div>
+
+</div><!-- /main -->
+
+<!-- OVERLAY RESULTADO -->
+<div class="ov" id="ov-res">
+  <div class="ov-box" id="ov-box">
+    <div class="ov-ico" id="ov-ico"></div>
+    <div class="ov-tit" id="ov-tit"></div>
+    <div class="ov-vend" id="ov-vend"></div>
+    <div class="ov-desc" id="ov-desc"></div>
+    <div class="ov-btns">
+      <button class="ov-btn ov-btn-main" onclick="fecharOv()">MISSÃO CUMPRIDA</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY DOBRO OU NADA -->
+<div class="ov" id="ov-dobro">
+  <div class="ov-dobro">
+    <div class="ov-ico">⚡</div>
+    <div class="ov-tit">DOBRO OU NADA</div>
+    <div class="ov-vend" id="dv-vend"></div>
+    <div class="ov-desc" id="dv-desc"></div>
+    <div class="timer-bar"><div class="timer-fill" id="dv-bar" style="width:100%"></div></div>
+    <div class="ov-btns">
+      <button class="ov-btn ov-btn-main" onclick="escolhaDobro(true)" id="dv-sim">⚡ ACEITAR DESAFIO</button>
+      <button class="ov-btn ov-btn-sec" onclick="escolhaDobro(false)">Receber 50%</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========== PREMIOS ===========
+var PR_CAMPO = [
+  {l:'SURPRESA',d:'R$ 50,00 — bem merecido, soldado!',               i:'💵',c:'#276749',w:14},
+  {l:'SURPRESA',d:'R$ 75,00 — missão cumprida!',                     i:'💵',c:'#276749',w:11},
+  {l:'SURPRESA',d:'R$ 90,00 — excelente trabalho!',                  i:'💰',c:'#B7791F',w:9},
+  {l:'SURPRESA',d:'R$ 100,00 — operação de sucesso!',                i:'💰',c:'#B7791F',w:7},
+  {l:'SURPRESA',d:'R$ 150,00 — JACKPOT! Você arrasou!',              i:'🏆',c:'#CC2200',w:4},
+  {l:'SURPRESA',d:'Café da manhã especial amanhã!',                  i:'☕',c:'#553C9A',w:10},
+  {l:'SURPRESA',d:'Pastel por conta da empresa!',                    i:'🥟',c:'#C05621',w:10},
+  {l:'SURPRESA',d:'Almoço — escolha do Rafael!',                     i:'🍽️',c:'#2B6CB0',w:8},
+  {l:'SURPRESA',d:'Ingresso de cinema — escolha o filme!',           i:'🎬',c:'#553C9A',w:6},
+  {l:'SURPRESA',d:'Tente novamente. Continue firme, soldado!',       i:'🎯',c:'#4A5568',w:21},
+];
+
+var PR_ELITE = [
+  {l:'SURPRESA',d:'R$ 100,00 — missão de alto nível!',               i:'💵',c:'#276749',w:16},
+  {l:'SURPRESA',d:'R$ 150,00 — operação elite!',                     i:'💰',c:'#B7791F',w:13},
+  {l:'SURPRESA',d:'R$ 220,00 — você é top!',                         i:'💰',c:'#B7791F',w:10},
+  {l:'SURPRESA',d:'R$ 300,00 — lenda do campo!',                     i:'🏆',c:'#CC2200',w:7},
+  {l:'SURPRESA',d:'R$ 400,00 — general do faturamento!',             i:'🏆',c:'#CC2200',w:4},
+  {l:'SURPRESA',d:'R$ 500,00 — JACKPOT ELITE! Histórico!',           i:'👑',c:'#FFD700',w:2},
+  {l:'SURPRESA',d:'Vale compra Mercado Livre até R$ 100!',           i:'🛒',c:'#2B6CB0',w:9},
+  {l:'SURPRESA',d:'Uma Alexa Echo é sua!',                           i:'🔊',c:'#553C9A',w:5},
+  {l:'SURPRESA',d:'Almoço premium — restaurante da sua escolha!',    i:'🥩',c:'#C05621',w:8},
+  {l:'DOBRO OU NADA',d:'',i:'⚡',c:'#CC6600',w:8,dobro:true},
+  {l:'SURPRESA',d:'Tente novamente — mas saiu com 2 fichas!',        i:'🎯',c:'#4A5568',w:18,ficha2:true},
+];
+
+// =========== STATE ===========
+var girando=false, fichas=0, hist=[];
+var pendDobro=null;
+
+(function(){
+  try{var h=sessionStorage.getItem('m550h');if(h)hist=JSON.parse(h);}catch(e){}
+  try{var f=sessionStorage.getItem('m550f');if(f)fichas=parseInt(f);}catch(e){}
+})();
+
+function salvarF(n){fichas=n;try{sessionStorage.setItem('m550f',n);}catch(e){}atuF();}
+function salvarH(){try{sessionStorage.setItem('m550h',JSON.stringify(hist.slice(0,80)));}catch(e){}}
+
+// =========== UI ===========
+function aba(id,el){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  document.getElementById('sc-'+id).classList.add('on');
+  el.classList.add('on');
+  if(id==='hist')renderH();
+  setTimeout(function(){
+    if(id==='campo')desenhar('campo');
+    if(id==='elite')desenhar('elite');
+  },30);
+}
+
+function atuF(){
+  document.getElementById('fn').textContent=fichas;
+  for(var i=1;i<=3;i++){
+    var el=document.getElementById('fc'+i);
+    if(i<=fichas)el.classList.add('on');else el.classList.remove('on');
+  }
+  document.getElementById('bt-usef').disabled=fichas<3;
+}
+
+function addFicha(){
+  if(fichas>=3){alert('Já tem 3 fichas! Use-as para girar a Roleta Elite.');return;}
+  salvarF(fichas+1);
+}
+
+function usarFichas(){
+  if(fichas<3)return;
+  salvarF(0);
+  document.querySelectorAll('.tab')[1].click();
+}
+
+// =========== ROLETA ===========
+function sortear(prs){
+  var tot=prs.reduce(function(a,p){return a+p.w;},0);
+  var r=Math.random()*tot,acc=0;
+  for(var i=0;i<prs.length;i++){acc+=prs[i].w;if(r<=acc)return{p:prs[i],i:i};}
+  return{p:prs[prs.length-1],i:prs.length-1};
+}
+
+function angCentro(prs,idx){
+  var tot=prs.reduce(function(a,p){return a+p.w;},0);
+  var a=0;
+  for(var i=0;i<idx;i++)a+=(prs[i].w/tot)*360;
+  a+=(prs[idx].w/tot)*180;
+  return a;
+}
+
+function desenhar(tipo){
+  var id=tipo==='campo'?'cv-campo':'cv-elite';
+  var c=document.getElementById(id);if(!c)return;
+  var ctx=c.getContext('2d');
+  var prs=tipo==='campo'?PR_CAMPO:PR_ELITE;
+  var W=c.width,cx=W/2,cy=W/2,r=cx-10;
+  var tot=prs.reduce(function(a,p){return a+p.w;},0);
+  var isE=tipo==='elite';
+
+  ctx.clearRect(0,0,W,W);
+  ctx.save();
+  ctx.shadowColor=isE?'#FFD700':'#00CC55';
+  ctx.shadowBlur=18;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#0a0a14';ctx.fill();
+  ctx.restore();
+
+  var ang=-Math.PI/2;
+  prs.forEach(function(p){
+    var sl=(p.w/tot)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
+    ctx.fillStyle=p.c+'cc';ctx.fill();
+    ctx.strokeStyle='#080810';ctx.lineWidth=2;ctx.stroke();
+
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(ang+sl/2);
+    ctx.textAlign='right';
+    var fs=Math.max(9,Math.min(12,r*0.085));
+    ctx.font='bold '+fs+'px Rajdhani,sans-serif';
+    ctx.fillStyle='#fff';ctx.shadowColor='#0008';ctx.shadowBlur=3;
+    ctx.fillText('?',r-12,5);
+    ctx.restore();
+    ang+=sl;
+  });
+
+  ctx.beginPath();ctx.arc(cx,cy,20,0,Math.PI*2);
+  ctx.fillStyle='#080810';ctx.fill();
+  ctx.strokeStyle=isE?'#FFD700':'#00CC55';ctx.lineWidth=3;ctx.stroke();
+}
+
+function girar(tipo){
+  if(girando)return;
+  var vsId='vs-'+tipo;
+  var vend=document.getElementById(vsId).value;
+  if(!vend){alert('Seleciona o vendedor primeiro!');return;}
+
+  girando=true;
+  var btId='bt-'+tipo;
+  document.getElementById(btId).disabled=true;
+
+  var prs=tipo==='campo'?PR_CAMPO:PR_ELITE;
+  var res=sortear(prs);
+  var angFinal=angCentro(prs,res.i);
+  var totalRot=360*7+(360-angFinal);
+  var dur=5000;var inicio=null;
+  var cvId=tipo==='campo'?'cv-campo':'cv-elite';
+  var cv=document.getElementById(cvId);
+  var ctx=cv.getContext('2d');
+  var W=cv.width;
+
+  function ease(t){return 1-Math.pow(1-t,4);}
+
+  function frame(ts){
+    if(!inicio)inicio=ts;
+    var t=Math.min((ts-inicio)/dur,1);
+    var rot=ease(t)*totalRot;
+
+    ctx.save();
+    ctx.clearRect(0,0,W,W);
+    ctx.translate(W/2,W/2);
+    ctx.rotate((rot*Math.PI)/180);
+    ctx.translate(-W/2,-W/2);
+    desenharCtx(ctx,tipo,W);
+    ctx.restore();
+
+    if(t<1){requestAnimationFrame(frame);}
+    else{
+      girando=false;
+      document.getElementById(btId).disabled=false;
+      afterGiro(tipo,res.p,vend);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function desenharCtx(ctx,tipo,W){
+  var prs=tipo==='campo'?PR_CAMPO:PR_ELITE;
+  var cx=W/2,cy=W/2,r=cx-10;
+  var tot=prs.reduce(function(a,p){return a+p.w;},0);
+  var isE=tipo==='elite';
+
+  ctx.shadowColor=isE?'#FFD700':'#00CC55';ctx.shadowBlur=14;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#0a0a14';ctx.fill();
+  ctx.shadowBlur=0;
+
+  var ang=-Math.PI/2;
+  prs.forEach(function(p){
+    var sl=(p.w/tot)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
+    ctx.fillStyle=p.c+'cc';ctx.fill();
+    ctx.strokeStyle='#080810';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(ang+sl/2);ctx.textAlign='right';
+    var fs=Math.max(9,Math.min(12,r*0.085));
+    ctx.font='bold '+fs+'px Rajdhani,sans-serif';
+    ctx.fillStyle='#fff';ctx.fillText('?',r-12,5);ctx.restore();
+    ang+=sl;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,20,0,Math.PI*2);ctx.fillStyle='#080810';ctx.fill();
+  ctx.strokeStyle=isE?'#FFD700':'#00CC55';ctx.lineWidth=3;ctx.stroke();
+}
+
+function afterGiro(tipo,p,vend){
+  // Ficha bônus campo
+  if(tipo==='campo'){var nf=Math.min(fichas+1,3);salvarF(nf);}
+
+  // 2 fichas no tente novamente elite
+  if(p.ficha2){var nf2=Math.min(fichas+2,3);salvarF(nf2);}
+
+  // Dobro ou nada
+  if(p.dobro){
+    mostrarDobro(vend);
+    return;
+  }
+
+  mostrarPremio(tipo,p,vend,false);
+}
+
+// =========== RESULTADO ===========
+function mostrarPremio(tipo,p,vend,dobrado){
+  var box=document.getElementById('ov-box');
+  var isTente=p.l.includes('Tente')||p.d.includes('Tente');
+  var desc=p.d;
+  if(dobrado)desc='🔥 DOBRADO! '+desc;
+  if(p.ficha2)desc=desc+' (+2 fichas adicionadas!)';
+
+  document.getElementById('ov-ico').textContent=p.i;
+  document.getElementById('ov-tit').textContent=isTente?'PRÓXIMA VEZ!':'🎖️ PRÊMIO REVELADO';
+  document.getElementById('ov-vend').textContent=vend;
+  document.getElementById('ov-desc').textContent=desc;
+  box.style.borderColor=isTente?'#4A5568':(dobrado?'#FF4400':p.c);
+
+  document.getElementById('ov-res').classList.add('show');
+
+  // Registrar
+  var h=new Date(),hh=h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');
+  hist.unshift({v:vend,r:tipo==='campo'?'Campo':'Elite',p:isTente?'Tente Nov.':desc.substring(0,40),i:p.i,h:hh,t:isTente});
+  salvarH();
+}
+
+function fecharOv(){document.getElementById('ov-res').classList.remove('show');}
+
+// =========== DOBRO ===========
+function mostrarDobro(vend){
+  pendDobro=vend;
+  document.getElementById('dv-vend').textContent=vend;
+  document.getElementById('dv-desc').innerHTML=
+    'Feche mais um pedido acima de <strong style="color:var(--gold)">R$ 10.000</strong> nos próximos <strong style="color:#FF8C00">3 dias</strong> e gira de novo com o prêmio <strong style="color:var(--gold)">DOBRADO</strong>.<br><br>'+
+    'Ou aceite <strong style="color:var(--green)">50% do prêmio atual</strong> agora.';
+  document.getElementById('ov-dobro').classList.add('show');
+
+  // Timer visual
+  var bar=document.getElementById('dv-bar');
+  var t=100,iv=setInterval(function(){
+    t-=2;bar.style.width=t+'%';
+    if(t<=0)clearInterval(iv);
+  },200);
+}
+
+function escolhaDobro(aceitar){
+  document.getElementById('ov-dobro').classList.remove('show');
+  var vend=pendDobro;pendDobro=null;
+
+  var h=new Date(),hh=h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');
+
+  if(aceitar){
+    hist.unshift({v:vend,r:'Elite',p:'DOBRO — 3 dias para 10k+',i:'⚡',h:hh,t:false});
+    salvarH();
+    var ov=document.getElementById('ov-res');
+    var box=document.getElementById('ov-box');
+    document.getElementById('ov-ico').textContent='⚡';
+    document.getElementById('ov-tit').textContent='DESAFIO ACEITO!';
+    document.getElementById('ov-vend').textContent=vend;
+    document.getElementById('ov-desc').textContent='Você tem 3 dias para fechar um novo pedido acima de R$ 10.000. Se conseguir, volta aqui e gira de novo — prêmio dobrado!';
+    box.style.borderColor='#FF8C00';
+    ov.classList.add('show');
+  } else {
+    // 50% — gira e divide
+    var prs=PR_ELITE.filter(function(p){return !p.dobro;});
+    var res=sortear(prs);
+    var p50=Object.assign({},res.p);
+    // Encontrar valor no texto
+    var m=p50.d.match(/R\$\s*([\d.]+)/);
+    if(m){
+      var v=parseFloat(m[1].replace('.',''));
+      var v50=Math.round(v*0.5);
+      p50.d=p50.d.replace(/R\$\s*[\d.]+/,'R$ '+v50+',00')+' (50% do giro)';
+    } else {
+      p50.d='50% do prêmio sorteado — '+p50.d;
+    }
+    hist.unshift({v:vend,r:'Elite',p:'50%: '+p50.d.substring(0,40),i:'💸',h:hh,t:false});
+    salvarH();
+    mostrarPremio('elite',p50,vend,false);
+  }
+}
+
+// =========== HISTORICO ===========
+function renderH(){
+  var el=document.getElementById('hlist');
+  if(!hist.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--sub);font-size:13px">Nenhum giro ainda — bora vender! 🔥</div>';return;}
+  el.innerHTML=hist.map(function(h){
+    var cor=h.t?'var(--sub)':'var(--gold)';
+    return '<div class="hi"><div class="hi-ico">'+h.i+'</div>'+
+      '<div class="hi-vend">'+h.v+'</div>'+
+      '<div class="hi-r">'+h.r+'</div>'+
+      '<div class="hi-p" style="color:'+cor+'">'+h.p+'</div>'+
+      '<div class="hi-h">'+h.h+'</div></div>';
+  }).join('');
+}
+
+function limparH(){
+  if(!confirm('Limpar todo o histórico?'))return;
+  hist=[];salvarH();renderH();
+}
+
+// =========== TECLADO TV ===========
+document.addEventListener('keydown',function(e){
+  var k=e.key;
+  if(k==='Enter'||k===' '){
+    e.preventDefault();
+    var on=document.querySelector('.screen.on');
+    if(!on)return;
+    var id=on.id;
+    if(id==='sc-campo'&&!girando)girar('campo');
+    if(id==='sc-elite'&&!girando)girar('elite');
+  }
+  if(k==='ArrowLeft'){
+    var tabs=document.querySelectorAll('.tab');
+    var idx=-1;tabs.forEach(function(t,i){if(t.classList.contains('on'))idx=i;});
+    tabs[(idx-1+tabs.length)%tabs.length].click();
+  }
+  if(k==='ArrowRight'){
+    var tabs2=document.querySelectorAll('.tab');
+    var idx2=-1;tabs2.forEach(function(t,i){if(t.classList.contains('on'))idx2=i;});
+    tabs2[(idx2+1)%tabs2.length].click();
+  }
+});
+
+// =========== INIT ===========
+window.addEventListener('load',function(){
+  desenhar('campo');desenhar('elite');atuF();
+});
+</script>
+</body>
+</html>
