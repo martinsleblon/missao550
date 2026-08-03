@@ -209,9 +209,11 @@ select.vsel:focus{border-color:var(--gold)}
       <div class="fc" id="fc1">🪙</div>
       <div class="fc" id="fc2">🪙</div>
       <div class="fc" id="fc3">🪙</div>
+      <div class="fc" id="fc4">🪙</div>
+      <div class="fc" id="fc5">🪙</div>
     </div>
-    <div class="fcnt"><span id="fn">0</span><span style="color:var(--sub);font-size:14px"> / 3</span></div>
-    <div class="fsub">3 fichas = 1 giro na Roleta Elite</div>
+    <div class="fcnt"><span id="fn">0</span><span style="color:var(--sub);font-size:14px"> / 5</span></div>
+    <div class="fsub">5 fichas = 1 giro na Roleta Elite</div>
     <div class="fsub" style="margin-top:6px;color:var(--green)">Giros campo: <strong id="giros-cnt">0/5 giros</strong> → +1 ficha automática</div>
     <div class="fbtn-row">
       <button class="btn-addf" onclick="addFicha()">+ Ficha manual</button>
@@ -280,6 +282,7 @@ select.vsel:focus{border-color:var(--gold)}
   </div>
   <div class="hbox" style="width:100%;max-width:620px">
     <h3>PREMIAÇÕES AGOSTO 2026</h3>
+    <div id="rank-elite" style="margin-bottom:1rem;padding:.8rem;background:var(--panel);border-radius:10px;border:1px solid var(--gold)44"></div>
     <div class="hlist" id="hlist"></div>
     <div style="text-align:center"><button class="btn-lim" onclick="limparH()">Limpar histórico</button></div>
   </div>
@@ -321,7 +324,7 @@ select.vsel:focus{border-color:var(--gold)}
 var PR_CAMPO = [
   {l:'SURPRESA',d:'R$ 50,00 — bem merecido, soldado!',               i:'💵',c:'#276749',w:9},
   {l:'SURPRESA',d:'R$ 75,00 — missão cumprida!',                     i:'💵',c:'#276749',w:9},
-  {l:'SURPRESA',d:'R$ 90,00 — excelente trabalho!',                  i:'💰',c:'#B7791F',w:9},
+  {l:'DOBRO OU NADA',d:'',                                           i:'⚡',c:'#CC6600',w:9,dobro:true,campo:true},
   {l:'SURPRESA',d:'R$ 100,00 — operação de sucesso!',                i:'💰',c:'#B7791F',w:9},
   {l:'SURPRESA',d:'R$ 150,00 — JACKPOT! Você arrasou!',              i:'🏆',c:'#CC2200',w:9},
   {l:'SURPRESA',d:'Café da manhã especial amanhã!',                  i:'☕',c:'#553C9A',w:9},
@@ -333,13 +336,13 @@ var PR_CAMPO = [
 ];
 
 var PR_ELITE = [
-  {l:'SURPRESA',d:'R$ 100,00 — missão de alto nível!',               i:'💵',c:'#276749',w:8},
+  {l:'SURPRESA',d:'Vale compras Mercado Livre R$ 120!',              i:'🛒',c:'#2B6CB0',w:8},
   {l:'SURPRESA',d:'R$ 150,00 — operação elite!',                     i:'💰',c:'#B7791F',w:8},
   {l:'SURPRESA',d:'R$ 220,00 — você é top!',                         i:'💰',c:'#B7791F',w:8},
   {l:'SURPRESA',d:'R$ 300,00 — lenda do campo!',                     i:'🏆',c:'#CC2200',w:8},
   {l:'SURPRESA',d:'R$ 400,00 — general do faturamento!',             i:'🏆',c:'#CC2200',w:8},
   {l:'SURPRESA',d:'R$ 500,00 — JACKPOT ELITE! Histórico!',           i:'👑',c:'#FFD700',w:8},
-  {l:'SURPRESA',d:'Vale compra Mercado Livre até R$ 100!',           i:'🛒',c:'#2B6CB0',w:8},
+  {l:'SURPRESA',d:'Voucher iFood R$ 100 — peça o que quiser!',       i:'🛵',c:'#EA1D2C',w:8},
   {l:'SURPRESA',d:'Uma Alexa Echo é sua!',                           i:'🔊',c:'#553C9A',w:8},
   {l:'SURPRESA',d:'Almoço premium — restaurante da sua escolha!',    i:'🥩',c:'#C05621',w:8},
   {l:'DOBRO OU NADA',d:'',i:'⚡',c:'#CC6600',w:8,dobro:true},
@@ -380,20 +383,20 @@ function atuContador(){
 }
 function atuF(){
   document.getElementById('fn').textContent=fichas;
-  for(var i=1;i<=3;i++){
+  for(var i=1;i<=5;i++){
     var el=document.getElementById('fc'+i);
     if(i<=fichas)el.classList.add('on');else el.classList.remove('on');
   }
-  document.getElementById('bt-usef').disabled=fichas<3;
+  document.getElementById('bt-usef').disabled=fichas<5;
 }
 
 function addFicha(){
-  if(fichas>=3){alert('Já tem 3 fichas! Use-as para girar a Roleta Elite.');return;}
+  if(fichas>=3){alert('Já tem 5 fichas! Use-as para girar a Roleta Elite.');return;}
   salvarF(fichas+1);
 }
 
 function usarFichas(){
-  if(fichas<3)return;
+  if(fichas<5)return;
   salvarF(0);
   document.querySelectorAll('.tab')[1].click();
 }
@@ -542,7 +545,7 @@ function afterGiro(tipo,p,vend){
 
   // Dobro ou nada
   if(p.dobro){
-    mostrarDobro(vend);
+    mostrarDobro(vend,p);
     return;
   }
 
@@ -574,12 +577,14 @@ function mostrarPremio(tipo,p,vend,dobrado){
 function fecharOv(){document.getElementById('ov-res').classList.remove('show');}
 
 // =========== DOBRO ===========
-function mostrarDobro(vend){
-  pendDobro=vend;
-  document.getElementById('dv-vend').textContent=vend;
+function mostrarDobro(vend,p){
+  pendDobro={vend:vend,campo:p&&p.campo};
+  document.getElementById('dv-vend').textContent=pendDobro.vend;
   document.getElementById('dv-desc').innerHTML=
-    'Feche mais um pedido acima de <strong style="color:var(--gold)">R$ 10.000</strong> nos próximos <strong style="color:#FF8C00">3 dias</strong> e gira de novo com o prêmio <strong style="color:var(--gold)">DOBRADO</strong>.<br><br>'+
-    'Ou aceite <strong style="color:var(--green)">50% do prêmio atual</strong> agora.';
+    (pendDobro.campo
+      ? 'Feche mais um pedido entre <strong style="color:var(--gold)">R$ 5.000 e R$ 10.000</strong> nos próximos <strong style="color:#FF8C00">3 dias</strong> e gira de novo — prêmio <strong style="color:var(--gold)">DOBRADO</strong> (máx R$ 300).<br><br>'
+      : 'Feche mais um pedido acima de <strong style="color:var(--gold)">R$ 10.000</strong> nos próximos <strong style="color:#FF8C00">3 dias</strong> e gira de novo — prêmio <strong style="color:var(--gold)">DOBRADO</strong>.<br><br>'
+    )+'Ou aceite <strong style="color:var(--green)">50% do prêmio atual</strong> agora.';
   document.getElementById('ov-dobro').classList.add('show');
 
   // Timer visual
@@ -592,7 +597,7 @@ function mostrarDobro(vend){
 
 function escolhaDobro(aceitar){
   document.getElementById('ov-dobro').classList.remove('show');
-  var vend=pendDobro;pendDobro=null;
+  var vend=pendDobro.vend;var isCampo=pendDobro.campo;pendDobro=null;
 
   var h=new Date(),hh=h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');
 
@@ -609,7 +614,7 @@ function escolhaDobro(aceitar){
     ov.classList.add('show');
   } else {
     // 50% — gira e divide
-    var prs=PR_ELITE.filter(function(p){return !p.dobro;});
+    var prs=(isCampo?PR_CAMPO:PR_ELITE).filter(function(p){return !p.dobro;});
     var res=sortear(prs);
     var p50=Object.assign({},res.p);
     // Encontrar valor no texto
@@ -628,7 +633,22 @@ function escolhaDobro(aceitar){
 }
 
 // =========== HISTORICO ===========
+function renderRankElite(){
+  var el=document.getElementById('rank-elite');
+  if(!el)return;
+  var contagem={LETICIA:0,THIAGO:0,BRUNA:0,MIRIAM:0};
+  hist.forEach(function(h){if(h.r==='Elite'&&!h.p.includes('Tente'))contagem[h.v]=(contagem[h.v]||0)+1;});
+  var rank=Object.entries(contagem).sort(function(a,b){return b[1]-a[1];});
+  var medals=['🥇','🥈','🥉','4️⃣'];
+  el.innerHTML='<div style="font-family:Orbitron,monospace;font-size:10px;color:var(--gold);letter-spacing:.1em;margin-bottom:.5rem">🏆 RANKING ELITE — GIROS</div>'+
+    rank.map(function(r,i){
+      return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">'+
+        '<span>'+medals[i]+' '+r[0]+'</span>'+
+        '<span style="color:var(--gold);font-weight:700">'+r[1]+' giros Elite</span></div>';
+    }).join('');
+}
 function renderH(){
+  renderRankElite();
   var el=document.getElementById('hlist');
   if(!hist.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--sub);font-size:13px">Nenhum giro ainda — bora vender! 🔥</div>';return;}
   el.innerHTML=hist.map(function(h){
