@@ -591,9 +591,13 @@ function afterGiro(tipo,p,vend){
     atuContador();
     if(girosC>=5){
       girosC=0;salvarG(0);
+      var nf=Math.min(fichas+1,5);salvarF(nf);
       setTimeout(function(){
-        var nf=Math.min(fichas+1,3);salvarF(nf);
-        alert('🪙 +1 FICHA ELITE! A cada 5 giros você ganha uma ficha. Continue! (' + fichas + '/3)');
+        mostrarToast('🪙 +1 FICHA ELITE por 5 giros! Fichas: '+fichas+'/5','#7F77DD');
+      },1800);
+    } else {
+      setTimeout(function(){
+        mostrarToast('Giro '+girosC+'/5 — faltam '+(5-girosC)+' giros para ganhar 1 Ficha Elite','#4A5568');
       },1800);
     }
   }
@@ -608,6 +612,11 @@ function afterGiro(tipo,p,vend){
   }
 
   mostrarPremio(tipo,p,vend,false);
+  // Toast ficha quando prêmio É a ficha
+  if(p.ficha&&tipo==='campo'){
+    var nfp=Math.min(fichas+1,5);salvarF(nfp);
+    setTimeout(function(){mostrarToast('🪙 +1 FICHA ELITE no prêmio! Fichas: '+fichas+'/5','#7F77DD');},1800);
+  }
 }
 
 // =========== RESULTADO ===========
@@ -747,6 +756,32 @@ document.addEventListener('keydown',function(e){
   }
 });
 
+
+
+// =========== TOAST ===========
+function mostrarToast(msg, cor){
+  var t=document.getElementById('toast-global');
+  if(!t){
+    t=document.createElement('div');
+    t.id='toast-global';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);'+
+      'padding:12px 24px;border-radius:12px;font-family:Orbitron,monospace;font-size:12px;font-weight:700;'+
+      'color:#fff;z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .4s;'+
+      'opacity:0;letter-spacing:.05em;border:2px solid;text-align:center;max-width:340px;pointer-events:none;'+
+      'box-shadow:0 8px 24px rgba(0,0,0,.5)';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.style.background=cor+'ee';
+  t.style.borderColor=cor;
+  t.style.transform='translateX(-50%) translateY(0)';
+  t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){
+    t.style.transform='translateX(-50%) translateY(100px)';
+    t.style.opacity='0';
+  },3500);
+}
 
 // =========== META ===========
 var META = 550000;
