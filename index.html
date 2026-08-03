@@ -196,7 +196,7 @@ select.vsel:focus{border-color:var(--gold)}
   </div>
 
   <div class="ctrl">
-    <select class="vsel" id="vs-campo">
+    <select class="vsel" id="vs-campo" onchange="carregarFichasVend(this.value)">
       <option value="">Selecionar vendedor...</option>
       <option>LETICIA</option><option>THIAGO</option><option>BRUNA</option><option>MIRIAM</option>
       <option disabled>──────────</option>
@@ -220,7 +220,7 @@ select.vsel:focus{border-color:var(--gold)}
     <div class="fsub" style="margin-top:6px;color:var(--green)">Giros campo: <strong id="giros-cnt">0/5 giros</strong> → +1 ficha automática</div>
     <div class="fbtn-row">
       <button class="btn-addf" onclick="addFicha()">+ Ficha manual</button>
-      <button class="btn-usef" id="bt-usef" onclick="usarFichas()" disabled>⚡ Usar 3 fichas</button>
+      <button class="btn-usef" id="bt-usef" onclick="usarFichas()" disabled>⚡ Usar 5 fichas → Elite</button>
     </div>
   </div>
 
@@ -263,7 +263,7 @@ select.vsel:focus{border-color:var(--gold)}
   <div class="gtbox" style="border-color:#FFD70033">
     <h3>Gatilhos — Roleta Elite</h3>
     <div class="gt"><div class="gt-ico">🏆</div><div class="gt-txt">Pedido acima de R$ 10.000</div><span class="tag" style="background:#2d2010;color:#F59E0B">GIRA DIRETO</span></div>
-    <div class="gt"><div class="gt-ico">🪙</div><div class="gt-txt">3 fichas acumuladas da Roleta Campo</div><span class="tag" style="background:#1a0d2d;color:#9F7AEA">VIA FICHAS</span></div>
+    <div class="gt"><div class="gt-ico">🪙</div><div class="gt-txt">5 fichas acumuladas da Roleta Campo</div><span class="tag" style="background:#1a0d2d;color:#9F7AEA">VIA FICHAS</span></div>
   </div>
 
   <div class="gtbox" style="border-color:#FFD70022;background:#FFD70006">
@@ -416,12 +416,31 @@ var pendDobro=null;
 
 (function(){
   try{var h=sessionStorage.getItem('m550h');if(h)hist=JSON.parse(h);}catch(e){}
-  try{var f=sessionStorage.getItem('m550f');if(f)fichas=parseInt(f);}catch(e){}
+  // fichas sao por vendedor — carregadas ao selecionar vendedor
   try{var g=sessionStorage.getItem('m550g');if(g)girosC=parseInt(g);}catch(e){}
 })();
 
-function salvarF(n){fichas=n;try{sessionStorage.setItem('m550f',n);}catch(e){}atuF();}
-function salvarG(n){girosC=n;try{sessionStorage.setItem('m550g',n);}catch(e){}}
+function getFichaKey(){
+  var v=document.getElementById('vs-campo')?document.getElementById('vs-campo').value:'';
+  if(!v||v==='')v=document.getElementById('vs-elite')?document.getElementById('vs-elite').value:'';
+  return v?'m550f_'+v:'m550f_GERAL';
+}
+function getFichas(vend){
+  var k=vend?'m550f_'+vend:'m550f_GERAL';
+  try{var v=sessionStorage.getItem(k);return v?parseInt(v):0;}catch(e){return 0;}
+}
+function salvarF(n,vend){
+  fichas=n;
+  var k=vend?'m550f_'+vend:getFichaKey();
+  try{sessionStorage.setItem(k,n);}catch(e){}
+  atuF();
+}
+function salvarG(n){
+  girosC=n;
+  var v=document.getElementById('vs-campo')?document.getElementById('vs-campo').value:'';
+  var k=v?'m550g_'+v:'m550g';
+  try{sessionStorage.setItem(k,n);}catch(e){}
+}
 function salvarH(){try{sessionStorage.setItem('m550h',JSON.stringify(hist.slice(0,80)));}catch(e){}}
 
 // =========== UI ===========
@@ -437,6 +456,13 @@ function aba(id,el){
   },30);
 }
 
+function carregarFichasVend(vend){
+  if(!vend)return;
+  fichas=getFichas(vend);
+  girosC=0;
+  try{var g=sessionStorage.getItem('m550g_'+vend);if(g)girosC=parseInt(g);}catch(e){}
+  atuF();atuContador();
+}
 function atuContador(){
   var el=document.getElementById('giros-cnt');
   if(el)el.textContent=girosC+'/5 giros';
@@ -445,9 +471,10 @@ function atuF(){
   document.getElementById('fn').textContent=fichas;
   for(var i=1;i<=5;i++){
     var el=document.getElementById('fc'+i);
-    if(i<=fichas)el.classList.add('on');else el.classList.remove('on');
+    if(el){if(i<=fichas)el.classList.add('on');else el.classList.remove('on');}
   }
-  document.getElementById('bt-usef').disabled=fichas<5;
+  var bt=document.getElementById('bt-usef');
+  if(bt)bt.disabled=fichas<5;
 }
 
 function addFicha(){
@@ -456,8 +483,13 @@ function addFicha(){
 }
 
 function usarFichas(){
+  var v=document.getElementById('vs-campo')?document.getElementById('vs-campo').value:'';
+  fichas=getFichas(v);
   if(fichas<5)return;
-  salvarF(0);
+  salvarF(0,v);
+  // Setar vendedor na elite também
+  var selE=document.getElementById('vs-elite');
+  if(selE&&v)selE.value=v;
   document.querySelectorAll('.tab')[1].click();
 }
 
@@ -589,17 +621,19 @@ function desenharCtx(ctx,tipo,W){
 function afterGiro(tipo,p,vend){
   // Contador de 5 giros campo — a cada 5 giros ganha 1 ficha
   if(tipo==='campo'){
+    var vAtual=vend;
+    fichas=getFichas(vAtual);
     girosC++;salvarG(girosC);
     atuContador();
     if(girosC>=5){
       girosC=0;salvarG(0);
-      var nf=Math.min(fichas+1,5);salvarF(nf);
+      var nf=Math.min(fichas+1,5);salvarF(nf,vAtual);
       setTimeout(function(){
-        mostrarToast('🪙 +1 FICHA ELITE por 5 giros! Fichas: '+fichas+'/5','#7F77DD');
+        mostrarToast('🪙 +1 FICHA ELITE por 5 giros! '+vAtual+': '+fichas+'/5','#7F77DD');
       },1800);
     } else {
       setTimeout(function(){
-        mostrarToast('Giro '+girosC+'/5 — faltam '+(5-girosC)+' giros para ganhar 1 Ficha Elite','#4A5568');
+        mostrarToast(vAtual+' — Giro '+girosC+'/5 (faltam '+(5-girosC)+' para Ficha Elite)','#4A5568');
       },1800);
     }
   }
@@ -616,8 +650,8 @@ function afterGiro(tipo,p,vend){
   mostrarPremio(tipo,p,vend,false);
   // Toast ficha quando prêmio É a ficha
   if(p.ficha&&tipo==='campo'){
-    var nfp=Math.min(fichas+1,5);salvarF(nfp);
-    setTimeout(function(){mostrarToast('🪙 +1 FICHA ELITE no prêmio! Fichas: '+fichas+'/5','#7F77DD');},1800);
+    fichas=getFichas(vend);var nfp=Math.min(fichas+1,5);salvarF(nfp,vend);
+    setTimeout(function(){mostrarToast('🪙 +1 FICHA ELITE no prêmio! '+vend+': '+fichas+'/5','#7F77DD');},1800);
   }
 }
 
