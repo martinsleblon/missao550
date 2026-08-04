@@ -413,35 +413,66 @@ var PR_ELITE = [
 // =========== STATE ===========
 var girando=false, fichas=0, hist=[], girosC=0;
 var pendDobro=null;
+var SUPA_URL='https://jfmxqrnblaoubumepcxs.supabase.co';
+var SUPA_KEY='sb_publishable_00X89MC5GDVxzVoJ8prIBg_Jh-UWimn';
 
-(function(){
-  try{var h=sessionStorage.getItem('m550h');if(h)hist=JSON.parse(h);}catch(e){}
-  // fichas sao por vendedor — carregadas ao selecionar vendedor
-  try{var g=sessionStorage.getItem('m550g');if(g)girosC=parseInt(g);}catch(e){}
-})();
+function supaFetch(path, method, body){
+  var opts={method:method||'GET',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}};
+  if(body)opts.body=JSON.stringify(body);
+  return fetch(SUPA_URL+'/rest/v1/'+path,opts);
+}
 
-function getFichaKey(){
-  var v=document.getElementById('vs-campo')?document.getElementById('vs-campo').value:'';
-  if(!v||v==='')v=document.getElementById('vs-elite')?document.getElementById('vs-elite').value:'';
-  return v?'m550f_'+v:'m550f_GERAL';
+async function carregarHist(){
+  try{
+    var r=await supaFetch('m550_historico?select=*&order=criado_em.desc&limit=80');
+    var d=await r.json();
+    hist=d.map(function(h){return{v:h.vendedor,r:h.roleta,p:h.premio,i:h.icone||'🎯',h:h.hora||'--:--',t:h.tente||false,id:h.id};});
+  }catch(e){console.log('Erro hist:',e);}
 }
-function getFichas(vend){
-  var k=vend?'m550f_'+vend:'m550f_GERAL';
-  try{var v=sessionStorage.getItem(k);return v?parseInt(v):0;}catch(e){return 0;}
+
+async function salvarHist(entry){
+  try{
+    await supaFetch('m550_historico','POST',{
+      vendedor:entry.v,roleta:entry.r,premio:entry.p,
+      icone:entry.i,hora:entry.h,tente:entry.t||false,
+      criado_em:new Date().toISOString()
+    });
+  }catch(e){console.log('Erro salvar hist:',e);}
 }
+
+async function carregarFichasVendedor(vend){
+  if(!vend)return;
+  try{
+    var r=await supaFetch('m550_fichas?vendedor=eq.'+encodeURIComponent(vend)+'&select=fichas,giros_campo');
+    var d=await r.json();
+    if(d&&d.length){fichas=d[0].fichas||0;girosC=d[0].giros_campo||0;}
+    else{fichas=0;girosC=0;}
+    atuF();atuContador();
+  }catch(e){fichas=0;girosC=0;atuF();atuContador();}
+}
+
+async function salvarFichasSupabase(vend,nFichas,nGiros){
+  if(!vend)return;
+  try{
+    await supaFetch('m550_fichas?vendedor=eq.'+encodeURIComponent(vend),'PATCH',{
+      fichas:nFichas,giros_campo:nGiros,atualizado_em:new Date().toISOString()
+    });
+  }catch(e){console.log('Erro salvar fichas:',e);}
+}
+
+function getFichas(vend){return fichas;}
 function salvarF(n,vend){
   fichas=n;
-  var k=vend?'m550f_'+vend:getFichaKey();
-  try{sessionStorage.setItem(k,n);}catch(e){}
   atuF();
+  var v=vend||( document.getElementById('vs-campo')?document.getElementById('vs-campo').value:'' );
+  if(v) salvarFichasSupabase(v,n,girosC);
 }
 function salvarG(n){
   girosC=n;
   var v=document.getElementById('vs-campo')?document.getElementById('vs-campo').value:'';
-  var k=v?'m550g_'+v:'m550g';
-  try{sessionStorage.setItem(k,n);}catch(e){}
+  if(v) salvarFichasSupabase(v,fichas,n);
 }
-function salvarH(){try{sessionStorage.setItem('m550h',JSON.stringify(hist.slice(0,80)));}catch(e){}}
+function salvarH(entry){if(entry)salvarHist(entry);}
 
 // =========== UI ===========
 function aba(id,el){
@@ -458,10 +489,8 @@ function aba(id,el){
 
 function carregarFichasVend(vend){
   if(!vend)return;
-  fichas=getFichas(vend);
-  girosC=0;
-  try{var g=sessionStorage.getItem('m550g_'+vend);if(g)girosC=parseInt(g);}catch(e){}
-  atuF();atuContador();
+  fichas=0;girosC=0;atuF();atuContador();
+  carregarFichasVendedor(vend);
 }
 function atuContador(){
   var el=document.getElementById('giros-cnt');
@@ -673,9 +702,9 @@ function mostrarPremio(tipo,p,vend,dobrado){
 
   // Registrar
   var h=new Date(),hh=h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');
-  hist.unshift({v:vend,r:tipo==='campo'?'Campo':'Elite',p:isTente?'Tente Nov.':desc.substring(0,40),i:p.i,h:hh,t:isTente});
-  salvarH();
-}
+  var eP={v:vend,r:tipo==='campo'?'Campo':'Elite',p:isTente?'Tente Nov.':desc.substring(0,40),i:p.i,h:hh,t:isTente};
+  hist.unshift(eP);salvarH(eP);
+  }
 
 function fecharOv(){document.getElementById('ov-res').classList.remove('show');}
 
@@ -705,9 +734,9 @@ function escolhaDobro(aceitar){
   var h=new Date(),hh=h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');
 
   if(aceitar){
-    hist.unshift({v:vend,r:isCampo?'Campo':'Elite',p:isCampo?'DOBRO — 3 dias para pedido campo':'DOBRO — 3 dias para 10k+',i:'⚡',h:hh,t:false});
-    salvarH();
-    var ov=document.getElementById('ov-res');
+    var eD={v:vend,r:isCampo?'Campo':'Elite',p:isCampo?'DOBRO — 3 dias para pedido campo':'DOBRO — 3 dias para 10k+',i:'⚡',h:hh,t:false};
+    hist.unshift(eD);salvarH(eD);
+        var ov=document.getElementById('ov-res');
     var box=document.getElementById('ov-box');
     document.getElementById('ov-ico').textContent='⚡';
     document.getElementById('ov-tit').textContent='DESAFIO ACEITO!';
@@ -729,9 +758,9 @@ function escolhaDobro(aceitar){
     } else {
       p50.d='50% do prêmio sorteado — '+p50.d;
     }
-    hist.unshift({v:vend,r:'Elite',p:'50%: '+p50.d.substring(0,40),i:'💸',h:hh,t:false});
-    salvarH();
-    mostrarPremio('elite',p50,vend,false);
+    var e50={v:vend,r:'Elite',p:'50%: '+p50.d.substring(0,40),i:'💸',h:hh,t:false};
+    hist.unshift(e50);salvarH(e50);
+        mostrarPremio('elite',p50,vend,false);
   }
 }
 
@@ -770,7 +799,8 @@ function renderH(){
 
 function limparH(){
   if(!confirm('Limpar todo o histórico?'))return;
-  hist=[];salvarH();renderH();
+  hist=[];renderH();
+  supaFetch('m550_historico?id=gt.0','DELETE').catch(function(){});
 }
 
 // =========== TECLADO TV ===========
@@ -951,14 +981,14 @@ function initTV(){
 var _abaOrig = window.aba;
 window.aba = function(id, el){
   _abaOrig(id, el);
-  if(id==='tv'){
-    setTimeout(initTV, 100);
-  }
+  if(id==='tv') setTimeout(initTV, 100);
+  if(id==='hist') carregarHist().then(function(){renderH();});
 };
 
 // =========== INIT ===========
 window.addEventListener('load',function(){
   desenhar('campo');desenhar('elite');atuF();atuContador();
+  carregarHist().then(function(){renderH();});
 });
 </script>
 </body>
