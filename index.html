@@ -536,11 +536,8 @@ function sortear(prs){
 }
 
 function angCentro(prs,idx){
-  var tot=prs.reduce(function(a,p){return a+p.w;},0);
-  var a=0;
-  for(var i=0;i<idx;i++)a+=(prs[i].w/tot)*360;
-  a+=(prs[idx].w/tot)*180;
-  return a;
+  var fatia=360/prs.length;
+  return idx*fatia + fatia/2;
 }
 
 function desenhar(tipo){
@@ -560,8 +557,8 @@ function desenhar(tipo){
   ctx.restore();
 
   var ang=-Math.PI/2;
+  var sl=(Math.PI*2)/prs.length;
   prs.forEach(function(p){
-    var sl=(p.w/tot)*Math.PI*2;
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
     ctx.fillStyle=p.c+'cc';ctx.fill();
     ctx.strokeStyle='#080810';ctx.lineWidth=2;ctx.stroke();
@@ -637,8 +634,8 @@ function desenharCtx(ctx,tipo,W){
   ctx.shadowBlur=0;
 
   var ang=-Math.PI/2;
+  var sl=(Math.PI*2)/prs.length;
   prs.forEach(function(p){
-    var sl=(p.w/tot)*Math.PI*2;
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
     ctx.fillStyle=p.c+'cc';ctx.fill();
     ctx.strokeStyle='#080810';ctx.lineWidth=2;ctx.stroke();
