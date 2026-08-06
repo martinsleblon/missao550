@@ -385,33 +385,34 @@ select.vsel:focus{border-color:var(--gold)}
 <script>
 // =========== PREMIOS ===========
 var PR_CAMPO = [
-  {l:'SURPRESA',d:'R$ 50,00 — bem merecido, soldado!',               i:'💵',c:'#276749',w:9},
-  {l:'SURPRESA',d:'R$ 75,00 — missão cumprida!',                     i:'💵',c:'#276749',w:8},
+  {l:'SURPRESA',d:'R$ 20,00 — bem merecido, soldado!',               i:'💵',c:'#276749',w:9},
+  {l:'SURPRESA',d:'R$ 30,00 — missão cumprida!',                     i:'💵',c:'#276749',w:8},
   {l:'DOBRO OU NADA',d:'',                                           i:'⚡',c:'#CC6600',w:7,dobro:true,campo:true},
-  {l:'SURPRESA',d:'R$ 100,00 — operação de sucesso!',                i:'💰',c:'#B7791F',w:6},
-  {l:'SURPRESA',d:'R$ 150,00 — JACKPOT! Você arrasou!',              i:'🏆',c:'#CC2200',w:3},
+  {l:'SURPRESA',d:'R$ 40,00 — operação de sucesso!',                 i:'💰',c:'#B7791F',w:6},
+  {l:'SURPRESA',d:'R$ 50,00 — o maior da rodada!',                   i:'🏆',c:'#CC2200',w:3},
   {l:'SURPRESA',d:'Café da manhã especial amanhã!',                  i:'☕',c:'#553C9A',w:10},
   {l:'SURPRESA',d:'Pastel por conta da empresa!',                    i:'🥟',c:'#C05621',w:10},
   {l:'SURPRESA',d:'Almoço — escolha do Rafael!',                     i:'🍽️',c:'#2B6CB0',w:9},
   {l:'SURPRESA',d:'Ingresso de cinema — escolha o filme!',           i:'🎬',c:'#553C9A',w:9},
-  {l:'SURPRESA',d:'🪙 FICHA ELITE — guarde para girar a Roleta Elite!', i:'🪙',c:'#7F77DD',w:9,ficha:true},
+  {l:'SURPRESA',d:'🪙 FICHA EXTRA — guarde para girar a Roleta Elite!', i:'🪙',c:'#7F77DD',w:9,ficha:true},
   {l:'SURPRESA',d:'Tente novamente. A missão continua!',             i:'🎯',c:'#4A5568',w:12},
 ];
 
 var PR_ELITE = [
   {l:'SURPRESA',d:'Saia 30 minutos mais cedo hoje!',                 i:'🚪',c:'#2F855A',w:14},
-  {l:'SURPRESA',d:'Vale compras Mercado Livre R$ 120!',              i:'🛒',c:'#2B6CB0',w:7},
-  {l:'SURPRESA',d:'R$ 150,00 — operação elite!',                     i:'💰',c:'#B7791F',w:5},
-  {l:'SURPRESA',d:'R$ 220,00 — você é top!',                         i:'💰',c:'#B7791F',w:3},
-  {l:'SURPRESA',d:'R$ 300,00 — lenda do campo!',                     i:'🏆',c:'#CC2200',w:2},
+  {l:'SURPRESA',d:'Vale compras Mercado Livre R$ 120!',              i:'🛒',c:'#2B6CB0',w:4},
+  {l:'SURPRESA',d:'R$ 150,00 — operação elite!',                     i:'💰',c:'#B7791F',w:3},
+  {l:'SURPRESA',d:'R$ 220,00 — você é top!',                         i:'💰',c:'#B7791F',w:2},
+  {l:'SURPRESA',d:'R$ 300,00 — lenda do campo!',                     i:'🏆',c:'#CC2200',w:1},
   {l:'SURPRESA',d:'R$ 400,00 — general do faturamento!',             i:'🏆',c:'#CC2200',w:1},
   {l:'SURPRESA',d:'R$ 500,00 — JACKPOT ELITE! Histórico!',           i:'👑',c:'#FFD700',w:1},
-  {l:'SURPRESA',d:'Voucher iFood R$ 100 — peça o que quiser!',       i:'🛵',c:'#EA1D2C',w:5},
+  {l:'SURPRESA',d:'Voucher iFood R$ 100 — peça o que quiser!',       i:'🛵',c:'#EA1D2C',w:4},
   {l:'SURPRESA',d:'Uma Alexa Echo é sua!',                           i:'🔊',c:'#553C9A',w:1},
   {l:'SURPRESA',d:'Almoço premium — restaurante da sua escolha!',    i:'🥩',c:'#C05621',w:8},
   {l:'DOBRO OU NADA',d:'',i:'⚡',c:'#CC6600',w:6,dobro:true},
-  {l:'SURPRESA',d:'Tente novamente — saiu com 1 ficha!',             i:'🎯',c:'#4A5568',w:12,ficha2:true},
-  {l:'SURPRESA',d:'Tente novamente — a elite exige mais!',           i:'🎯',c:'#4A5568',w:12},
+  {l:'SURPRESA',d:'Não foi dessa vez, mas você ganhou 1 ficha campo!', i:'🎯',c:'#4A5568',w:16,ficha2:true},
+  {l:'SURPRESA',d:'1 dia de home office!',                           i:'🏠',c:'#2B6CB0',w:8},
+  {l:'SURPRESA',d:'Você ganhou 30 min de sono! Entrada às 8h30.',    i:'😴',c:'#553C9A',w:8},
 ];
 
 // =========== STATE ===========
