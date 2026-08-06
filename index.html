@@ -128,6 +128,9 @@ select.vsel:focus{border-color:var(--gold)}
 .hi-r{font-size:10px;color:var(--sub);min-width:45px}
 .hi-p{flex:1}
 .hi-h{font-size:10px;color:var(--sub)}
+.hi-del{flex-shrink:0;font-size:12px;width:22px;height:22px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;line-height:1}
+.hi-del:hover{background:#2d1010;color:#FC8181;border-color:#FC8181}
 .btn-lim{font-size:11px;padding:5px 14px;border-radius:6px;
   border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;margin-top:1rem}
 .btn-lim:hover{color:var(--text);border-color:var(--sub)}
@@ -794,8 +797,16 @@ function renderH(){
       '<div class="hi-vend">'+h.v+'</div>'+
       '<div class="hi-r">'+h.r+'</div>'+
       '<div class="hi-p" style="color:'+cor+'">'+h.p+'</div>'+
-      '<div class="hi-h">'+h.h+'</div></div>';
+      '<div class="hi-h">'+h.h+'</div>'+
+      '<button class="hi-del" title="Excluir esta linha" onclick="excluirLinhaH('+h.id+')">✕</button></div>';
   }).join('');
+}
+
+async function excluirLinhaH(id){
+  if(!confirm('Excluir esta linha do histórico?'))return;
+  hist=hist.filter(function(h){return h.id!==id;});
+  renderH();
+  try{ await supaFetch('m550_historico?id=eq.'+id,'DELETE'); }catch(e){}
 }
 
 function limparH(){
