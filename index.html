@@ -383,31 +383,32 @@ select.vsel:focus{border-color:var(--gold)}
 // =========== PREMIOS ===========
 var PR_CAMPO = [
   {l:'SURPRESA',d:'R$ 50,00 — bem merecido, soldado!',               i:'💵',c:'#276749',w:9},
-  {l:'SURPRESA',d:'R$ 75,00 — missão cumprida!',                     i:'💵',c:'#276749',w:9},
-  {l:'DOBRO OU NADA',d:'',                                           i:'⚡',c:'#CC6600',w:9,dobro:true,campo:true},
-  {l:'SURPRESA',d:'R$ 100,00 — operação de sucesso!',                i:'💰',c:'#B7791F',w:9},
-  {l:'SURPRESA',d:'R$ 150,00 — JACKPOT! Você arrasou!',              i:'🏆',c:'#CC2200',w:9},
-  {l:'SURPRESA',d:'Café da manhã especial amanhã!',                  i:'☕',c:'#553C9A',w:9},
-  {l:'SURPRESA',d:'Pastel por conta da empresa!',                    i:'🥟',c:'#C05621',w:9},
+  {l:'SURPRESA',d:'R$ 75,00 — missão cumprida!',                     i:'💵',c:'#276749',w:8},
+  {l:'DOBRO OU NADA',d:'',                                           i:'⚡',c:'#CC6600',w:7,dobro:true,campo:true},
+  {l:'SURPRESA',d:'R$ 100,00 — operação de sucesso!',                i:'💰',c:'#B7791F',w:6},
+  {l:'SURPRESA',d:'R$ 150,00 — JACKPOT! Você arrasou!',              i:'🏆',c:'#CC2200',w:3},
+  {l:'SURPRESA',d:'Café da manhã especial amanhã!',                  i:'☕',c:'#553C9A',w:10},
+  {l:'SURPRESA',d:'Pastel por conta da empresa!',                    i:'🥟',c:'#C05621',w:10},
   {l:'SURPRESA',d:'Almoço — escolha do Rafael!',                     i:'🍽️',c:'#2B6CB0',w:9},
   {l:'SURPRESA',d:'Ingresso de cinema — escolha o filme!',           i:'🎬',c:'#553C9A',w:9},
   {l:'SURPRESA',d:'🪙 FICHA ELITE — guarde para girar a Roleta Elite!', i:'🪙',c:'#7F77DD',w:9,ficha:true},
-  {l:'SURPRESA',d:'Tente novamente. A missão continua!',             i:'🎯',c:'#4A5568',w:9},
+  {l:'SURPRESA',d:'Tente novamente. A missão continua!',             i:'🎯',c:'#4A5568',w:12},
 ];
 
 var PR_ELITE = [
-  {l:'SURPRESA',d:'Vale compras Mercado Livre R$ 120!',              i:'🛒',c:'#2B6CB0',w:8},
-  {l:'SURPRESA',d:'R$ 150,00 — operação elite!',                     i:'💰',c:'#B7791F',w:8},
-  {l:'SURPRESA',d:'R$ 220,00 — você é top!',                         i:'💰',c:'#B7791F',w:8},
-  {l:'SURPRESA',d:'R$ 300,00 — lenda do campo!',                     i:'🏆',c:'#CC2200',w:8},
-  {l:'SURPRESA',d:'R$ 400,00 — general do faturamento!',             i:'🏆',c:'#CC2200',w:8},
-  {l:'SURPRESA',d:'R$ 500,00 — JACKPOT ELITE! Histórico!',           i:'👑',c:'#FFD700',w:8},
-  {l:'SURPRESA',d:'Voucher iFood R$ 100 — peça o que quiser!',       i:'🛵',c:'#EA1D2C',w:8},
-  {l:'SURPRESA',d:'Uma Alexa Echo é sua!',                           i:'🔊',c:'#553C9A',w:8},
+  {l:'SURPRESA',d:'Saia 30 minutos mais cedo hoje!',                 i:'🚪',c:'#2F855A',w:14},
+  {l:'SURPRESA',d:'Vale compras Mercado Livre R$ 120!',              i:'🛒',c:'#2B6CB0',w:7},
+  {l:'SURPRESA',d:'R$ 150,00 — operação elite!',                     i:'💰',c:'#B7791F',w:5},
+  {l:'SURPRESA',d:'R$ 220,00 — você é top!',                         i:'💰',c:'#B7791F',w:3},
+  {l:'SURPRESA',d:'R$ 300,00 — lenda do campo!',                     i:'🏆',c:'#CC2200',w:2},
+  {l:'SURPRESA',d:'R$ 400,00 — general do faturamento!',             i:'🏆',c:'#CC2200',w:1},
+  {l:'SURPRESA',d:'R$ 500,00 — JACKPOT ELITE! Histórico!',           i:'👑',c:'#FFD700',w:1},
+  {l:'SURPRESA',d:'Voucher iFood R$ 100 — peça o que quiser!',       i:'🛵',c:'#EA1D2C',w:5},
+  {l:'SURPRESA',d:'Uma Alexa Echo é sua!',                           i:'🔊',c:'#553C9A',w:1},
   {l:'SURPRESA',d:'Almoço premium — restaurante da sua escolha!',    i:'🥩',c:'#C05621',w:8},
-  {l:'DOBRO OU NADA',d:'',i:'⚡',c:'#CC6600',w:8,dobro:true},
-  {l:'SURPRESA',d:'Tente novamente — saiu com 1 ficha!',             i:'🎯',c:'#4A5568',w:8,ficha2:true},
-  {l:'SURPRESA',d:'Tente novamente — a elite exige mais!',           i:'🎯',c:'#4A5568',w:8},
+  {l:'DOBRO OU NADA',d:'',i:'⚡',c:'#CC6600',w:6,dobro:true},
+  {l:'SURPRESA',d:'Tente novamente — saiu com 1 ficha!',             i:'🎯',c:'#4A5568',w:12,ficha2:true},
+  {l:'SURPRESA',d:'Tente novamente — a elite exige mais!',           i:'🎯',c:'#4A5568',w:12},
 ];
 
 // =========== STATE ===========
@@ -507,7 +508,7 @@ function atuF(){
 }
 
 function addFicha(){
-  if(fichas>=3){alert('Já tem 5 fichas! Use-as para girar a Roleta Elite.');return;}
+  if(fichas>=5){alert('Já tem 5 fichas! Use-as para girar a Roleta Elite.');return;}
   salvarF(fichas+1);
 }
 
@@ -668,7 +669,7 @@ function afterGiro(tipo,p,vend){
   }
 
   // 1 ficha no tente novamente elite
-  if(p.ficha2){var nf2=Math.min(fichas+1,3);salvarF(nf2);}
+  if(p.ficha2){var nf2=Math.min(fichas+1,5);salvarF(nf2);}
 
   // Dobro ou nada
   if(p.dobro){
@@ -856,13 +857,23 @@ function mostrarToast(msg, cor){
 // =========== META ===========
 var META = 550000;
 var fatAtual = 0;
-try{var fs=sessionStorage.getItem('m550fat');if(fs)fatAtual=parseInt(fs);}catch(e){}
 
-function atuMeta(){
+async function carregarMeta(){
+  try{
+    var r=await supaFetch('m550_meta?id=eq.1&select=fat_atual');
+    var d=await r.json();
+    if(d&&d.length) fatAtual=d[0].fat_atual||0;
+  }catch(e){}
+  renderMeta();
+}
+
+async function atuMeta(){
   var v=document.getElementById('tv-input').value.replace(/\D/g,'');
   if(!v)return;
   fatAtual=parseInt(v);
-  try{sessionStorage.setItem('m550fat',fatAtual);}catch(e){}
+  try{
+    await supaFetch('m550_meta?id=eq.1','PATCH',{fat_atual:fatAtual,atualizado_em:new Date().toISOString()});
+  }catch(e){}
   document.getElementById('tv-input').value='';
   renderMeta();
   var agora=new Date();
@@ -972,7 +983,7 @@ function toggleTV(){
 }
 
 function initTV(){
-  renderMeta();
+  carregarMeta();
   tvMostrar(0);
   tvTimer=setInterval(tvProxima,12000);
 }
